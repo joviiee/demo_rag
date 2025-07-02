@@ -13,10 +13,14 @@ load_dotenv()
 llm = init_chat_model("gemini-2.0-flash", model_provider="google_genai")
 embedding_model = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
 
-document_list = [
-    file for file in os.listdir("data/") if file.endswith(".pdf") and os.path.isfile(os.path.join("data/"))
+file_paths = [
+    os.path.join("data/",file) for file in os.listdir("data/") if file.endswith(".pdf") and os.path.isfile(os.path.join("data/"))
 ]
 
-for document in document_list:
-
-
+for file_path in file_paths:
+    loader = PyPDFLoader(file_path)
+    doc = loader.load()
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=300, chunk_overlap=100, add_start_index=True,separators=["\n", ".", "!", "?", ",", " "]
+    )
+    all_splits = text_splitter.split_documents(doc)
