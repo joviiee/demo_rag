@@ -1,7 +1,8 @@
 import streamlit as st
-# from backend import graph
-from embed_data import load_uploaded_pdfs, embed_docs
+from backend import build_agent
+from embed_data import load_uploaded_pdfs, embed_docs, clear_all_pgvector_data
 import os
+from langchain_core.messages import HumanMessage,AIMessage
 
 st.set_page_config(page_title="RAG Chatbot", layout="centered")
 st.title("RAG Chatbot")
@@ -20,7 +21,7 @@ if uploaded_files and st.button("Upload"):
 
 
 # Prompt Input
-st.subheader("💬 Ask your question:")
+st.subheader("Ask your question:")
 user_query = st.text_input("Enter your prompt")
 
 # Optional model controls
@@ -29,19 +30,41 @@ with st.sidebar:
     temperature = st.slider("Temperature", 0.0, 1.0, 0.3, step=0.05)
     max_retrievals = st.slider("Max Retrievals", 1, 5, 3, step=1)
 
+if "agent" not in st.session_state:
+    st.session_state.agent = build_agent()
+
 # Ask and display
-if st.button("🚀 Ask"):
+if st.button("Ask"):
     if not user_query.strip():
         st.warning("Please enter a valid question.")
     else:
         with st.spinner("Generating answer..."):
-            print("bye")
-            # response = ask_question(
-            #     collection_name=collection_name,
-            #     query=user_query,
-            #     temperature=temperature,
-            #     max_tokens=max_tokens,
-            #     model=model_choice
-            # )
-        st.success("Answer:")
-        st.write("response")
+            current_state = {
+                "messages":[HumanMessage(content=user_query)],
+                "temperature":temperature,
+                "num_results":max_retrievals
+            }
+            with st.chat_message("assistant"):
+                response_placeholder = st.empty()
+                full_response = ""
+
+                response_placeholder.empty()
+                
+                for step in st.session_state.agent.stream(
+                    current_state,
+                    config={
+                        "configurable": {
+                            "thread_id": "user123",
+                            "temperature":temperature,
+                            "num_results":max_retrievals
+                        }
+                    },
+                    stream_mode="values"
+                ):
+                    msg = step["messages"][-1]
+                    if isinstance(msg,AIMessage):
+                        full_response += msg.content
+                        response_placeholder.markdown(full_response)
+
+if st.button("Clear DataBase"):
+    clear_all_pgvector_data()
