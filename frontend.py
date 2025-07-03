@@ -1,7 +1,6 @@
 import streamlit as st
 from backend import build_agent
 from embed_data import load_uploaded_pdfs, embed_docs, clear_all_pgvector_data
-import os
 from langchain_core.messages import HumanMessage,AIMessage
 
 st.set_page_config(page_title="RAG Chatbot", layout="centered")
@@ -12,7 +11,6 @@ uploaded_files = st.file_uploader("Upload PDFs", type=["pdf"], accept_multiple_f
 
 
 if uploaded_files and st.button("Upload"):
-    print(uploaded_files[0].name)
     with st.spinner("Uploading documents ..."):
         docs = load_uploaded_pdfs(uploaded_files=uploaded_files)
         embed_docs(docs)

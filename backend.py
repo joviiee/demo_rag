@@ -51,7 +51,6 @@ def retrieve(
             connection=DB_CONNECTION_STRING
         )
     retrieved_docs = retriever.similarity_search(query = query, k = num_results)
-    print(retrieved_docs)
     serialised = "\n\n".join(
         (f"Source : {doc.metadata}\nContent:{doc.page_content}")
         for doc in retrieved_docs

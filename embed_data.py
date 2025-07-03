@@ -29,7 +29,7 @@ def load_uploaded_pdfs(uploaded_files):
 
 def embed_docs(docs):
     text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=300, chunk_overlap=100, add_start_index=True,separators=["\n", ".", "!", "?", ",", " "]
+        chunk_size=300, chunk_overlap=100, add_start_index=True, separators=["\n", ".", "!", "?", ",", " "]
     )
     all_splits = text_splitter.split_documents(docs)
 
@@ -69,7 +69,6 @@ def clear_all_pgvector_data():
     conn.commit()
     cur.close()
     conn.close()
-    print("db cleared ...")
 
 # clear_all_pgvector_data()
 
